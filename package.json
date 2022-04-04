@@ -1,0 +1,14 @@
+{
+	"name": "com.bgs.reflectors",
+	"version": "0.0.1",
+	"displayName": "Reflectors",
+	"description": "Ultra-powerful and blazing fast reflection utilities for Unity.",
+	"unity": "2021.1",
+	"dependencies": {},
+	"keywords": ["reflection, properties, unity"],
+	"author": {
+		"name": "Ben Sulzinsky",
+		"email": "bsulzinsky@gmail.com",
+		"url": "http://www.bgsmusic.com"
+	}
+}
