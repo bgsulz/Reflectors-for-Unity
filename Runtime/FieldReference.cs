@@ -15,7 +15,7 @@ namespace Extra.Editor.Properties
         [SerializeField] protected Object root;
         [SerializeField] protected string name;
 
-        public abstract void Initialize();
+        public abstract void Initialize(bool? useExpression = null);
     }
 
     [Serializable]
@@ -23,15 +23,13 @@ namespace Extra.Editor.Properties
     {
         private Func<object, T> _getter;
 
-        public override void Initialize() => _getter = Getter.Build<T>(root.GetType(), name, AccessFlags);
-
-        public T Value
+        public override void Initialize(bool? useExpression = null)
         {
-            get
-            {
-                if (_getter == null) throw new NullReferenceException($"Getter for field {name} is null.");
-                return _getter.Invoke(root);
-            }
+            _getter = Getter.Build<T>(name, root.GetType(), AccessFlags, useExpression);
+            if (_getter == null)
+                throw new ArgumentException($"Unable to build getter for object {root.name} and field {name}.");
         }
+
+        public T Value => _getter.Invoke(root);
     }
 }

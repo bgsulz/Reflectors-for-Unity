@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Extra.Extensions;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace Extra.Editor.Properties
 
         private FieldReference _subject;
         private StringSearchProvider _searchProvider;
+
+        private string[] _membersList;
 
         private SearchDepthAttribute Attribute => attribute as SearchDepthAttribute;
 
@@ -34,10 +37,27 @@ namespace Extra.Editor.Properties
             right.x += left.width;
 
             // Populate obj from field
-            if (!TryGetObjectFromField(objProp, (left, right), out var obj)) return;
+            EditorGUI.BeginChangeCheck();
+            objProp.objectReferenceValue = EditorGUI.ObjectField(left, objProp.objectReferenceValue, typeof(Object), true);
+            var changed = EditorGUI.EndChangeCheck();
 
-            // Find suitable members
-            if (!TryGetMembersOfTargetTypeAll(obj, right, out var membersList)) return;
+            if (changed && objProp.objectReferenceValue == null)
+            {
+                EditorGUI.LabelField(right, "No object in field.");
+                return;
+            }
+
+            if (changed || _membersList == null)
+            {
+                // Find suitable members
+                var foundFields = TryGetMembersOfTargetType(objProp.objectReferenceValue, right, out _membersList);
+                if (!foundFields) return;
+            }
+
+            if (changed)
+            {
+                pathProp.stringValue = _membersList[0];
+            }
 
             // Check if dropdown clicked
             var buttonClicked = EditorGUI.DropdownButton(right, new GUIContent(pathProp.stringValue), FocusType.Keyboard);
@@ -45,7 +65,7 @@ namespace Extra.Editor.Properties
 
             // Set up SearchWindow and provider
             if (!_searchProvider) _searchProvider = ScriptableObject.CreateInstance<StringSearchProvider>();
-            _searchProvider.Construct(membersList, x =>
+            _searchProvider.Construct(_membersList, x =>
             {
                 pathProp.stringValue = x;
                 pathProp.serializedObject.ApplyModifiedProperties();
@@ -53,19 +73,10 @@ namespace Extra.Editor.Properties
             SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), _searchProvider);
         }
 
-        private static bool TryGetObjectFromField(SerializedProperty objProp, (Rect left, Rect right) positions, out Object obj)
-        {
-            obj = objProp.objectReferenceValue = EditorGUI.ObjectField(positions.left, objProp.objectReferenceValue, typeof(Object), true);
-            if (obj) return true;
-
-            EditorGUI.LabelField(positions.right, "No object in field.");
-            return false;
-        }
-
-        private bool TryGetMembersOfTargetTypeAll(Object obj, Rect position, out string[] membersList)
+        private bool TryGetMembersOfTargetType(Object obj, Rect position, out string[] membersList)
         {
             var targetType = fieldInfo.FieldType.GenericTypeArguments[0];
-            membersList = RecursiveGetMembersOfTargetTypeAll(targetType, obj.GetType(), maxDepth: Attribute?.SearchDepth ?? 1).ToArray();
+            membersList = RecursiveGetMembersOfTargetType(targetType, obj.GetType(), maxDepth: Attribute?.SearchDepth ?? 1).ToArray();
 
             if (membersList.Length > 0) return true;
 
@@ -73,7 +84,7 @@ namespace Extra.Editor.Properties
             return false;
         }
 
-        private IEnumerable<string> RecursiveGetMembersOfTargetTypeAll(Type targetType, Type rootType, string prefix = "", int depth = 0, int maxDepth = 1)
+        private IEnumerable<string> RecursiveGetMembersOfTargetType(Type targetType, Type rootType, string prefix = "", int depth = 0, int maxDepth = 1)
         {
             if (depth > maxDepth) yield break;
 
@@ -91,7 +102,7 @@ namespace Extra.Editor.Properties
                 if (itemType == targetType) yield return $"{prefix}{item.Name}";
                 else if (itemType.IsPrimitive) continue;
 
-                foreach (var subitem in RecursiveGetMembersOfTargetTypeAll(targetType, itemType, $"{prefix}{item.Name}.", depth + 1, maxDepth))
+                foreach (var subitem in RecursiveGetMembersOfTargetType(targetType, itemType, $"{prefix}{item.Name}.", depth + 1, maxDepth))
                 {
                     yield return subitem;
                 }

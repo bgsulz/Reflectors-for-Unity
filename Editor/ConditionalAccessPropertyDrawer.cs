@@ -105,7 +105,7 @@ namespace Extra.Editor.Properties
 
             for (var i = 0; i < conditionNames.Length; i++)
             {
-                _getters[i] = Getter.Build<bool>(context.GetType(), conditionNames[i], AccessFlags);
+                _getters[i] = Getter.Build<bool>(conditionNames[i], context.GetType(), AccessFlags);
             }
         }
     }
