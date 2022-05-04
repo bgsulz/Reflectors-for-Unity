@@ -1,6 +1,37 @@
 # Reflectors for Unity
 Ultra-powerful and blazing fast reflection utilities for Unity.
 
+### FieldReference
+Dynamically reference a field, property, or parameter-less method on any Object.
+
+```cs
+using Extra.Editor.Properties;
+using UnityEngine;
+
+public class ColorMatcher : MonoBehaviour
+{
+    [SerializeField] private FieldReference<Color> colorProperty;
+
+    private SpriteRenderer _renderer;
+
+    private void Start()
+    {
+        colorProperty.Initialize();
+        _renderer = GetComponent<SpriteRenderer>();
+    }
+
+    private void Update()
+    {
+        _renderer.color = colorProperty.Value;
+    }
+}
+```
+
+![FieldReference Demo](https://user-images.githubusercontent.com/38191432/166614302-946f456a-b880-408d-8c10-3b3b4c195ac6.gif)
+
+###### But isn't this slow?
+Nope. The `Initialize` method compiles an Expression that retrieves the selected property. In terms of elapsed time, accessing a field is roughly **2x slower** than compiled code, whereas accessing a property or method is **nearly compile-time fast.**
+
 ## How do I add this to Unity?
 It's easy!
 
