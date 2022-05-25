@@ -68,7 +68,7 @@ public class GetterExample : MonoBehaviour
     
     private void Start()
     {
-        _getter = Getter.Build<Color>(PropertyPath, typeof(SpriteRenderer), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+        _getter = Getter.Build<Color>(PropertyPath, typeof(SpriteRenderer), BindingFlags.Public | BindingFlags.Instance);
         
         var leftHandColor = _getter(leftHandSprite);
         var rightHandColor = _getter(rightHandSprite);
