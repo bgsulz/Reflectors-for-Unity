@@ -21,57 +21,48 @@ It's easy!
 Dynamically reference a field, property, or parameter-less method on any Object.
 
 ```cs
-using Extra.Editor.Properties;
-using UnityEngine;
+[SerializeField] private FieldReference<Color> colorProperty;
 
-public class ColorMatcher : MonoBehaviour
+private void Start()
 {
-    [SerializeField] private FieldReference<Color> colorProperty;
-
-    private SpriteRenderer _renderer;
-
-    private void Start()
-    {
-        colorProperty.Initialize();
-        _renderer = GetComponent<SpriteRenderer>();
-    }
-
-    private void Update()
-    {
-        _renderer.color = colorProperty.Value;
-    }
-}
+    colorProperty.Initialize();
+    GetComponent<SpriteRenderer>().color = colorProperty.Value;
+} 
 ```
 
 ![FieldReference Demo](https://user-images.githubusercontent.com/38191432/166614302-946f456a-b880-408d-8c10-3b3b4c195ac6.gif)
 
-#### But isn't this slow?
-Nope. The `Initialize` method compiles an Expression that retrieves the selected property. In terms of elapsed time, accessing a field is roughly **2x slower** than compiled code, whereas accessing a property or method is **nearly compile-time fast.**
-
 ***
 
+### Show-/Hide-/Enable-/Disable-If Attribute
+Easy, dynamic custom Inspector with exclusively PropertyDrawers -- compatible with your existing custom editors.
+
+```
+[SerializeField] private bool shouldUseRaycast;
+[SerializeField, ShowIf("shouldUseRaycast")] private float raycastLength;
+[SerializeField, HideIf("shouldUseRaycast")] private float detectionRadius;
+```
+
 ### Getter
-The code that powers FieldReference; build a "getter" Expression from a property path.
+All previous APIs use this behind the scenes. Build a Getter for your own purposes.
 
 ```cs
-using Extra.Editor.Properties;
-using UnityEngine;
+private const string PropertyPath = "color";
 
-public class GetterExample : MonoBehaviour
+[SerializeField] private SpriteRenderer powerUpSprite;
+
+private Getter<Color> _getter;
+
+private void Start()
 {
-    private const string PropertyPath = "color";
-
-    [SerializeField] private SpriteRenderer leftHandSprite;
-    [SerializeField] private SpriteRenderer rightHandSprite;
-    
-    private Func<object, Color> _getter;
-    
-    private void Start()
-    {
-        _getter = Getter.Build<Color>(PropertyPath, typeof(SpriteRenderer), BindingFlags.Public | BindingFlags.Instance);
-        
-        var leftHandColor = _getter(leftHandSprite);
-        var rightHandColor = _getter(rightHandSprite);
-    }
+    _getter = Getter.Build<Color>(powerUpSprite, PropertyPath);
+    var powerUpColor = _getter.Value;
 }
 ```
+
+#### But isn't this reflection? That's too slow for use at runtime, right?
+Only the `Initialize` method uses reflection; it gathers `MethodInfo` objects and compiles an `Expression` that retrieves the selected property. 
+
+In terms of elapsed time, accessing a field is roughly **2x slower** than compiled code, whereas accessing a property or method is **nearly compile-time fast.**
+
+Benchmarks are soon to come.
