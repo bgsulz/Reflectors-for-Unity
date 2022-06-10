@@ -10,12 +10,12 @@ using Object = UnityEngine.Object;
 
 namespace Extra.Editor.Properties
 {
-    [CustomPropertyDrawer(typeof(FieldReference<>), true)]
+    [CustomPropertyDrawer(typeof(PropertyReference<>), true)]
     public class FieldReferenceDrawer : PropertyDrawer
     {
         private readonly Dictionary<Type, MemberInfo[]> _cachedMemberInfosMap = new();
 
-        private FieldReference _subject;
+        private PropertyReference _subject;
         private StringSearchProvider _searchProvider;
 
         private string[] _membersList;
@@ -41,7 +41,7 @@ namespace Extra.Editor.Properties
             objProp.objectReferenceValue = EditorGUI.ObjectField(left, objProp.objectReferenceValue, typeof(Object), true);
             var changed = EditorGUI.EndChangeCheck();
 
-            if (changed && objProp.objectReferenceValue == null)
+            if (objProp.objectReferenceValue == null)
             {
                 EditorGUI.LabelField(right, "No object in field.");
                 return;
@@ -114,7 +114,7 @@ namespace Extra.Editor.Properties
             if (_cachedMemberInfosMap.TryGetValue(type, out var res))
                 return res;
 
-            res = type.GetMembers(FieldReference.AccessFlags);
+            res = type.GetMembers(PropertyReference.AccessFlags);
             _cachedMemberInfosMap.Add(type, res);
             return res;
         }

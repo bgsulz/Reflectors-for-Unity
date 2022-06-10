@@ -15,8 +15,7 @@ namespace Extra.Editor.Properties
         private const BindingFlags AccessFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         private const string ArrayErrorMsg = "This attribute does not support lists; use DataArray<T> or DataList<T>.";
 
-        private object _root;
-        private Func<object, bool>[] _getters;
+        private Getter<bool>[] _getters;
 
         private bool? _isArrayItem;
         private float _propertyHeight;
@@ -81,7 +80,7 @@ namespace Extra.Editor.Properties
 
             foreach (var getter in _getters)
             {
-                var res = getter.Invoke(_root);
+                var res = getter.Value;
 
                 switch (res)
                 {
@@ -100,12 +99,11 @@ namespace Extra.Editor.Properties
 
         private void InitializeGettersAndContainer(object context, string[] conditionNames)
         {
-            _getters = new Func<object, bool>[conditionNames.Length];
-            _root = context;
+            _getters = new Getter<bool>[conditionNames.Length];
 
             for (var i = 0; i < conditionNames.Length; i++)
             {
-                _getters[i] = Getter.Build<bool>(conditionNames[i], context.GetType(), AccessFlags);
+                _getters[i] = Getter.Build<bool>(context, conditionNames[i], AccessFlags);
             }
         }
     }
