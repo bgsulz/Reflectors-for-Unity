@@ -43,6 +43,8 @@ Easy, dynamic custom Inspector with exclusively PropertyDrawers -- compatible wi
 [SerializeField, HideIf("shouldUseRaycast")] private float detectionRadius;
 ```
 
+***
+
 ### Getter
 All previous APIs use this behind the scenes. Build a Getter for your own purposes.
 
