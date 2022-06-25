@@ -20,11 +20,11 @@ namespace Extra.Editor.Properties
     [Serializable]
     public class PropertyReference<T> : PropertyReference
     {
-        protected Getter<T> PropertyGetter;
+        protected PropertyGetter<T> PropertyGetter;
 
         public override void Initialize(bool? useExpression = null)
         {
-            PropertyGetter = Getter.Build<T>(root, propertyPath, AccessFlags, useExpression);
+            PropertyGetter = Getter.BuildPropertyGetter<T>(root, propertyPath, AccessFlags, useExpression);
         }
 
         public T Value => PropertyGetter.Value;
