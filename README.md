@@ -37,11 +37,13 @@ private void Start()
 ### Show-/Hide-/Enable-/Disable-If Attribute
 Easy, dynamic custom Inspector with exclusively PropertyDrawers -- compatible with your existing custom editors.
 
-```
+```cs
 [SerializeField] private bool shouldUseRaycast;
 [SerializeField, ShowIf("shouldUseRaycast")] private float raycastLength;
 [SerializeField, HideIf("shouldUseRaycast")] private float detectionRadius;
 ```
+
+***
 
 ### Getter
 All previous APIs use this behind the scenes. Build a Getter for your own purposes.
