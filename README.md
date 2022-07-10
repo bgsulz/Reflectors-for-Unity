@@ -54,6 +54,8 @@ Only the `Initialize` method uses reflection. Then, it compiles a LINQ `Expressi
 
 Running this `Func` retrieves the value with nearly compile-time speed. It is suitable for use at runtime. Accessing fields from the Unity's C++ layer (say, `transform.position`) is sometimes even faster than compiled code.
 
+The below benchmarks are for accessing a field. Complete benchmarks can be found [here.](BENCHMARKS.md)
+
 | Access type | Elapsed time (ticks/100,000 accesses) | Ratio vs. compiled |
 | - | - | - |
 | Compiled | 37,515 | 1x |
