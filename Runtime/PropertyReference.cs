@@ -9,8 +9,6 @@ namespace Extra.Editor.Properties
     [Serializable]
     public abstract class PropertyReference
     {
-        public const BindingFlags AccessFlags = (BindingFlags) 52;
-
         [SerializeField] protected Object root;
         [SerializeField] protected string propertyPath;
 
@@ -24,7 +22,7 @@ namespace Extra.Editor.Properties
 
         public override void Initialize(bool? useExpression = null)
         {
-            PropertyGetter = Getter.BuildPropertyGetter<T>(root, propertyPath, AccessFlags, useExpression);
+            PropertyGetter = Getter.BuildPropertyGetter<T>(root, propertyPath, Getter.AccessFlags, useExpression);
         }
 
         public T Value => PropertyGetter.Value;

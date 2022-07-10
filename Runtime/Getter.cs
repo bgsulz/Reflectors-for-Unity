@@ -4,6 +4,8 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using GluonGui.WorkspaceWindow.Views;
+using UnityEngine;
 
 namespace Extra.Reflection
 {
@@ -14,7 +16,9 @@ namespace Extra.Reflection
             false;
 #endif
             true;
-        
+
+        public const BindingFlags AccessFlags = (BindingFlags) 52;
+
         public static Func<TRoot, TReturn> BuildFunc<TRoot, TReturn>(MemberInfo[] infos, bool? useExpression = null)
         {
             var useExpressionCalculated = useExpression ?? ExpressionsSupported;
@@ -25,30 +29,29 @@ namespace Extra.Reflection
         
         private static Func<TRoot, TReturn> BuildFuncWithExpression<TRoot, TReturn>(MemberInfo[] infos)
         {
-            var body = Expression.Parameter(typeof(TRoot)) as Expression;
-            body = infos.Aggregate(body, (current, info) => info switch
+            var input = Expression.Parameter(typeof(TRoot));
+            
+            var access = infos.Aggregate(input as Expression, (current, info) => info switch
             {
                 FieldInfo or PropertyInfo => Expression.MakeMemberAccess(current, info),
                 MethodInfo mi => Expression.Call(current, mi),
                 _ => throw new ArgumentOutOfRangeException($"MemberInfo {info.Name} is not FieldInfo, PropertyInfo, or MethodInfo.")
             });
-            var returned = Expression.Convert(body, typeof(TReturn));
-            var lambda = Expression.Lambda<Func<TRoot, TReturn>>(returned, Expression.Parameter(typeof(TRoot)));
+            
+            var converter = Expression.Convert(access, typeof(TReturn));
+            var lambda = Expression.Lambda<Func<TRoot, TReturn>>(converter, input);
 
             return lambda.Compile();
         }
 
         private static Func<TRoot, TReturn> BuildFuncWithReflection<TRoot, TReturn>(MemberInfo[] infos)
         {
-            return root => (TReturn)infos.Aggregate<MemberInfo, object>(
-                root, (current, item) => item switch
-                {
-                    FieldInfo fi => fi.GetValue(current),
-                    PropertyInfo pi => pi.GetValue(current),
-                    MethodInfo mi => mi.Invoke(current, Array.Empty<object>()),
-                    _ => null
-                }
-            );
+            return root =>
+            {
+                object obj = root;
+                foreach (var info in infos) obj = info.GetValue(obj);
+                return (TReturn)obj;
+            };
         }
     }
 }

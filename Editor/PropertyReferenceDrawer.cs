@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Extra.Extensions;
+using Extra.Reflection;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 namespace Extra.Editor.Properties
 {
     [CustomPropertyDrawer(typeof(PropertyReference<>), true)]
-    public class FieldReferenceDrawer : PropertyDrawer
+    public class PropertyReferenceDrawer : PropertyDrawer
     {
         private readonly Dictionary<Type, MemberInfo[]> _cachedMemberInfosMap = new();
 
@@ -28,7 +28,7 @@ namespace Extra.Editor.Properties
 
             // Retrieve props
             var objProp = property.FindPropertyRelative("root");
-            var pathProp = property.FindPropertyRelative("name");
+            var pathProp = property.FindPropertyRelative("propertyPath");
 
             // Set up rects
             var left = positionNoLabel;
@@ -50,13 +50,24 @@ namespace Extra.Editor.Properties
             if (changed || _membersList == null)
             {
                 // Find suitable members
-                var foundFields = TryGetMembersOfTargetType(objProp.objectReferenceValue, right, out _membersList);
-                if (!foundFields) return;
+                var targetType = fieldInfo.FieldType.GenericTypeArguments[0];
+                var foundFields = TryGetMembersOfTargetType(targetType, objProp.objectReferenceValue.GetType(), out _membersList);
+                if (!foundFields)
+                {
+                    pathProp.stringValue = string.Empty;
+                    return;
+                }
             }
 
             if (changed)
             {
                 pathProp.stringValue = _membersList[0];
+            }
+
+            if (_membersList.Length <= 0)
+            {
+                EditorGUI.LabelField(right, "No properties found.");
+                return;
             }
 
             // Check if dropdown clicked
@@ -73,15 +84,10 @@ namespace Extra.Editor.Properties
             SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), _searchProvider);
         }
 
-        private bool TryGetMembersOfTargetType(Object obj, Rect position, out string[] membersList)
+        private bool TryGetMembersOfTargetType(Type targetType, Type rootType, out string[] membersList)
         {
-            var targetType = fieldInfo.FieldType.GenericTypeArguments[0];
-            membersList = RecursiveGetMembersOfTargetType(targetType, obj.GetType(), maxDepth: Attribute?.SearchDepth ?? 1).ToArray();
-
-            if (membersList.Length > 0) return true;
-
-            EditorGUI.LabelField(position, $"No fields of type {targetType}.");
-            return false;
+            membersList = RecursiveGetMembersOfTargetType(targetType, rootType, maxDepth: Attribute?.SearchDepth ?? 1).ToArray();
+            return membersList.Length > 0;
         }
 
         private IEnumerable<string> RecursiveGetMembersOfTargetType(Type targetType, Type rootType, string prefix = "", int depth = 0, int maxDepth = 1)
@@ -114,7 +120,7 @@ namespace Extra.Editor.Properties
             if (_cachedMemberInfosMap.TryGetValue(type, out var res))
                 return res;
 
-            res = type.GetMembers(PropertyReference.AccessFlags);
+            res = type.GetMembers(Getter.AccessFlags);
             _cachedMemberInfosMap.Add(type, res);
             return res;
         }

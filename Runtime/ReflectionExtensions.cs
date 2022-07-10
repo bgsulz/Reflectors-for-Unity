@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace Extra.Reflection
 {
@@ -29,6 +30,28 @@ namespace Extra.Reflection
             }
 
             return infos;
+        }
+
+        public static object GetValue(this MemberInfo info, object root)
+        {
+            return info switch
+            {
+                FieldInfo fi => fi.GetValue(root),
+                PropertyInfo pi => pi.GetValue(root),
+                MethodInfo mi => mi.Invoke(root, Array.Empty<object>()),
+                _ => null
+            };
+        }
+        
+        public static void SetValue(this MemberInfo info, object root, object value)
+        {
+            switch (info)
+            {
+                case FieldInfo fi:
+                    fi.SetValue(root, value); break;
+                case PropertyInfo pi:
+                    pi.SetValue(root, value); break;
+            }
         }
     }
 }
