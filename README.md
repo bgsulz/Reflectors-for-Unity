@@ -5,6 +5,7 @@ Ultra-powerful and blazing fast reflection utilities for Unity.
 
 ### FieldReference
 Dynamically reference a field, property, or parameter-less method on any Object.
+_Great for consolidating scripts whose only difference is a type!_
 
 ```cs
 [SerializeField] private FieldReference<Color> colorProperty;
@@ -49,11 +50,9 @@ private void Start()
 ```
 
 #### But isn't this reflection? That's too slow for use at runtime, right?
-Only the `Initialize` method uses reflection; it gathers `MethodInfo` objects and compiles an `Expression` that retrieves the selected property. 
+Only the `Initialize` method uses reflection. Then, it compiles a LINQ `Expression` into a `Func<TRoot, TReturn>`, where `TRoot` is the root type and `TReturn` is the retrieved type.
 
-In terms of elapsed time, accessing a field is roughly **2x slower** than compiled code, whereas accessing a property or method is **nearly compile-time fast.**
-
-Benchmarks are soon to come.
+Running this `Func` retrieves the value with nearly compile-time speed. It is suitable for use at runtime. Accessing fields from the Unity's C++ layer (say, `transform.position`) is sometimes even faster than compiled code.
 
 ***
 
