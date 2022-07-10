@@ -1,6 +1,12 @@
 # Reflectors for Unity
 Ultra-powerful and blazing fast reflection utilities for Unity.
 
+| Field access | Elapsed time (ticks/100,000 accesses) | Ratio vs. compiled |
+| - | - | - |
+| Compiled | 37,515 | 1x |
+| Getter | 43,204 | 1.152x |
+| Reflection | 317,665 | 8.468x |
+
 ***
 
 ### FieldReference
@@ -21,46 +27,42 @@ private void Start()
 
 ***
 
-### Show-/Hide-/Enable-/Disable-If Attribute
-Easy, dynamic custom Inspector with exclusively PropertyDrawers -- compatible with your existing custom editors.
+### ShowIf
+Easy, dynamic custom Inspector. Only uses PropertyDrawers for total compatibility with existing custom editors.
 
 ```cs
-[SerializeField] private bool shouldUseRaycast;
-[SerializeField, ShowIf("shouldUseRaycast")] private float raycastLength;
-[SerializeField, HideIf("shouldUseRaycast")] private float detectionRadius;
+public bool shouldUseRaycast;
+[ShowIf("shouldUseRaycast")] public float raycastLength;
+[HideIf("shouldUseRaycast")] public float detectionRadius;
+
+public bool useCustomTitle;
+[DisableIf("useCustomTitle")] public string defaultTitle;
+[EnableIf("useCustomTitle")] public string overrideTitle;
 ```
 
 ***
 
 ### Getter
-All previous APIs use this behind the scenes. Build a Getter for your own purposes.
+All previous APIs use this behind the scenes. You can build a Getter for your own purposes.
 
 ```cs
-private const string PropertyPath = "color";
-
 [SerializeField] private SpriteRenderer powerUpSprite;
+[SerializeField] private SpriteRenderer debuffSprite;
 
 private Getter<Color> _getter;
 
 private void Start()
 {
-    _getter = Getter.Build<Color>(powerUpSprite, PropertyPath);
-    var powerUpColor = _getter.Value;
+    _getter = Getter.Build<Color>(typeof(SpriteRenderer), "color");
+    var powerUpColor = _getter.GetValue(powerUpSprite);
+    var debuffColor = _getter.GetValue(debuffSprite);
 }
 ```
 
-#### But isn't this reflection? That's too slow for use at runtime, right?
-Only the `Initialize` method uses reflection. Then, it compiles a LINQ `Expression` into a `Func<TRoot, TReturn>`, where `TRoot` is the root type and `TReturn` is the retrieved type.
+#### How is this reflection so fast?
+Only the `Initialize` method uses traditional reflection. Then, it compiles a LINQ `Expression` into a Getter `Func`. As shown in the benchmarks above, `Func` is suitably fast for use at runtime.
 
-Running this `Func` retrieves the value with nearly compile-time speed. It is suitable for use at runtime. Accessing fields from the Unity's C++ layer (say, `transform.position`) is sometimes even faster than compiled code.
-
-The below benchmarks are for accessing a field. Complete benchmarks can be found [here.](BENCHMARKS.md)
-
-| Access type | Elapsed time (ticks/100,000 accesses) | Ratio vs. compiled |
-| - | - | - |
-| Compiled | 37,515 | 1x |
-| Getter | 43,204 | 1.152x |
-| Reflection | 317,665 | 8.468x |
+Complete benchmarks can be found [here.](BENCHMARKS.md)
 
 ***
 
