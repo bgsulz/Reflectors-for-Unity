@@ -14,7 +14,7 @@ Dynamically reference a field, property, or parameter-less method on any Object.
 _Great for consolidating scripts whose only difference is a type!_
 
 ```cs
-[SerializeField] private FieldReference<Color> colorProperty;
+[SerializeField] private PropertyReference<Color> colorProperty;
 
 private void Start()
 {
@@ -62,7 +62,7 @@ private void Start()
 #### How is this reflection so fast?
 Only the `Initialize` method uses traditional reflection. Then, it compiles a LINQ `Expression` into a Getter `Func`. As shown in the benchmarks above, `Func` is suitably fast for use at runtime.
 
-Complete benchmarks can be found [here.](BENCHMARKS.md)
+Complete benchmarks can be found [here.](Documentation/Benchmarks.md)
 
 ***
 
