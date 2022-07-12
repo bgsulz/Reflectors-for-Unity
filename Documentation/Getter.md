@@ -27,7 +27,7 @@ void Update()
 ### Methods
 
 ```cs
-TReturn GetValue(object root)
+TReturn GetValue(object root);
 ```
 
 #### Returns
@@ -40,7 +40,7 @@ This method is only present on `Getter<TRoot, TReturn>` objects.
 > The root object from which to get the property.
 
 ```cs
-TReturn GetValue(TRoot root)
+TReturn GetValue(TRoot root);
 ```
 
 #### Returns
@@ -87,8 +87,8 @@ TReturn Value
 ### Static Methods
 
 ```cs
-Getter<TReturn> Build<TProperty>(Type rootType, string propertyPath, BindingFlags bindingFlags, bool? useExpression)
-Getter<TRoot, TReturn> Build<TRootType, TPropertyType>(string propertyPath, BindingFlags bindingFlags, bool? useExpression)
+Getter<TReturn> Build<TProperty>(Type rootType, string propertyPath, BindingFlags bindingFlags, bool? useExpression);
+Getter<TRoot, TReturn> Build<TRootType, TPropertyType>(string propertyPath, BindingFlags bindingFlags, bool? useExpression);
 ```
 
 #### Returns
@@ -133,8 +133,8 @@ If true, the `Getter` is built as an `Expression`. If false, the `Getter` is bui
 Note that if an unsupported platform builds the `Getter` as an `Expression`, it will use an interpreter in lieu of compiling the `Expression`. This is often even slower than reflection. It is usually best to leave this parameter as `null`, its default value.
 
 ```cs
-bool TryBuild<TReturn>(Type rootType, string propertyPath, out Getter<TReturn> getter, BindingFlags bindingFlags, bool? useExpression)
-bool TryBuild<TRoot, TReturn>(string propertyPath, out Getter<TRoot, TReturn> getter, BindingFlags bindingFlags, bool? useExpression)
+bool TryBuild<TReturn>(Type rootType, string propertyPath, out Getter<TReturn> getter, BindingFlags bindingFlags, bool? useExpression);
+bool TryBuild<TRoot, TReturn>(string propertyPath, out Getter<TRoot, TReturn> getter, BindingFlags bindingFlags, bool? useExpression);
 ```
 
 These are wrapper methods for `Build<TReturn>` and `Build<TRoot, TReturn>`. Parameters shared between them are only described in brief. See above for more details.
