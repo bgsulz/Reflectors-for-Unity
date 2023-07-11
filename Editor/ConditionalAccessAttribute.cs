@@ -73,7 +73,7 @@ namespace Extra.Editor.Properties
     public class IfOnTabAttribute : ShowIfAttribute
     {
         // TODO: Add validation
-        public IfOnTabAttribute(string tabsName, int tabNumber) : base($"{tabsName}.OnTab{tabNumber}") { }
+        public IfOnTabAttribute(string tabsName, int tabIndex) : base($"{tabsName}.OnTab{tabIndex}") { }
     }
 
     public class IfFoldoutAttribute : ShowIfAttribute

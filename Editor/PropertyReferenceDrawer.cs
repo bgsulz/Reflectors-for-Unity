@@ -120,7 +120,7 @@ namespace Extra.Editor.Properties
             if (_cachedMemberInfosMap.TryGetValue(type, out var res))
                 return res;
 
-            res = type.GetMembers(Getter.AccessFlags);
+            res = type.GetMembers((BindingFlags) 52);
             _cachedMemberInfosMap.Add(type, res);
             return res;
         }

@@ -1,7 +1,6 @@
 ﻿#if UNITY_EDITOR
 
 using System;
-using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using Extra.Extensions;
@@ -12,10 +11,10 @@ namespace Extra.Editor.Properties
     [CustomPropertyDrawer(typeof(ConditionalAccessAttribute), true)]
     public class ConditionalAccessPropertyDrawer : PropertyDrawer
     {
-        private const BindingFlags AccessFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         private const string ArrayErrorMsg = "This attribute does not support lists; use DataArray<T> or DataList<T>.";
 
-        private PropertyGetter<bool>[] _getters;
+        private Getter<bool>[] _getters;
+        private object _root;
 
         private bool? _isArrayItem;
         private float _propertyHeight;
@@ -26,7 +25,11 @@ namespace Extra.Editor.Properties
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            _isArrayItem ??= property.serializedObject.FindProperty(fieldInfo.Name).isArray;
+            if (_isArrayItem == null)
+            {
+                var myProperty = property.serializedObject.FindProperty(fieldInfo.Name);
+                _isArrayItem = myProperty.propertyType != SerializedPropertyType.String && myProperty.isArray;
+            }
 
             if (_isArrayItem!.Value)
             {
@@ -80,7 +83,7 @@ namespace Extra.Editor.Properties
 
             foreach (var getter in _getters)
             {
-                var res = getter.Value;
+                var res = getter.GetValue(_root);
 
                 switch (res)
                 {
@@ -99,11 +102,13 @@ namespace Extra.Editor.Properties
 
         private void InitializeGettersAndContainer(object context, string[] conditionNames)
         {
-            _getters = new PropertyGetter<bool>[conditionNames.Length];
+            _getters = new Getter<bool>[conditionNames.Length];
+            _root = context;
+            var rootType = context.GetType();
 
             for (var i = 0; i < conditionNames.Length; i++)
             {
-                _getters[i] = Getter.BuildPropertyGetter<bool>(context, conditionNames[i], AccessFlags);
+                _getters[i] = Getter.Build<bool>(rootType, conditionNames[i]);
             }
         }
     }

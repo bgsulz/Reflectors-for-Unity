@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Extra.Reflection
@@ -53,5 +55,26 @@ namespace Extra.Reflection
                     pi.SetValue(root, value); break;
             }
         }
+
+        private static readonly Dictionary<string, string> TypeAliases = new()
+        {
+            ["Void"] = "void",
+            ["Int32"] = "int",
+            ["Single"] = "float",
+            ["Double"] = "double",
+            ["Boolean"] = "bool",
+            ["System.String"] = "string",
+        };
+
+        public static string ToKeyword(this string name) 
+            => TypeAliases.TryGetValue(name, out var res) ? res : name;
+
+        public static string ReplaceKeywords(this string input)
+        {
+            var patternString = string.Join("|", TypeAliases.Keys.Select(x => $"({x})"));
+            var pattern = new Regex(patternString);
+            return pattern.Replace(input, match => match.Value.ToKeyword());
+        }
+
     }
 }

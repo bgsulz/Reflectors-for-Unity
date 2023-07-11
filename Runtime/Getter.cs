@@ -1,27 +1,15 @@
-﻿#define EXTRA_REFLECTORS
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using GluonGui.WorkspaceWindow.Views;
-using UnityEngine;
 
 namespace Extra.Reflection
 {
     public static partial class Getter
     {
-        private const bool ExpressionsSupported =
-#if ((UNITY_WEBGL || UNITY_IOS || ENABLE_IL2CPP) && !UNITY_EDITOR)
-            false;
-#endif
-            true;
-
-        public const BindingFlags AccessFlags = (BindingFlags) 52;
-
         public static Func<TRoot, TReturn> BuildFunc<TRoot, TReturn>(MemberInfo[] infos, bool? useExpression = null)
         {
-            var useExpressionCalculated = useExpression ?? ExpressionsSupported;
+            var useExpressionCalculated = useExpression ?? Accessor.ExpressionsSupported;
             return useExpressionCalculated
                 ? BuildFuncWithExpression<TRoot, TReturn>(infos)
                 : BuildFuncWithReflection<TRoot, TReturn>(infos);
