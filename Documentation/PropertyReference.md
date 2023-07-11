@@ -55,7 +55,7 @@ This attribute can be optionally added to a `PropertyReference<T>` to specify ho
 ### Constructors
 
 ```cs
-SearchDepthAttribute(int searchDepth)
+SearchDepthAttribute(int searchDepth);
 ```
 
 #### Parameters

@@ -1,6 +1,9 @@
 # Reflectors for Unity
 Ultra-powerful and blazing fast reflection utilities for Unity.
 
+| [Documentation](Documentation) | [Benchmarks](Documentation/Benchmarks.md) |
+| - | - |
+
 | Field access | Elapsed time (ticks/100,000 accesses) | Ratio vs. compiled |
 | - | - | - |
 | Compiled | 37,515 | 1x |
@@ -9,7 +12,7 @@ Ultra-powerful and blazing fast reflection utilities for Unity.
 
 ***
 
-### FieldReference
+### PropertyReference
 Dynamically reference a field, property, or parameter-less method on any Object.
 _Great for consolidating scripts whose only difference is a type!_
 
@@ -23,7 +26,7 @@ private void Start()
 } 
 ```
 
-![FieldReference Demo](https://user-images.githubusercontent.com/38191432/166614302-946f456a-b880-408d-8c10-3b3b4c195ac6.gif)
+![PropertyReference Demo](https://user-images.githubusercontent.com/38191432/166614302-946f456a-b880-408d-8c10-3b3b4c195ac6.gif)
 
 ***
 
@@ -46,8 +49,8 @@ public bool useCustomTitle;
 All previous APIs use this behind the scenes. You can build a Getter for your own purposes.
 
 ```cs
-[SerializeField] private SpriteRenderer powerUpSprite;
-[SerializeField] private SpriteRenderer debuffSprite;
+public private SpriteRenderer powerUpSprite;
+public SpriteRenderer debuffSprite;
 
 private Getter<Color> _getter;
 
