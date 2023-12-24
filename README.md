@@ -1,8 +1,13 @@
 # Reflectors for Unity
-Ultra-powerful and blazing fast reflection utilities for Unity.
+
+**Fast and powerful reflection utilities for Unity.**
 
 | [Documentation](Documentation) | [Benchmarks](Documentation/Benchmarks.md) |
 | - | - |
+
+### How fast is it, really?
+
+Hopefully, fast enough!
 
 | Field access | Elapsed time (ticks/100,000 accesses) | Ratio vs. compiled |
 | - | - | - |
@@ -10,7 +15,42 @@ Ultra-powerful and blazing fast reflection utilities for Unity.
 | Getter | 43,204 | 1.152x |
 | Reflection | 317,665 | 8.468x |
 
+### Quick Start Guide
+This works by building a `Getter` or `Setter` object. These objects can be used to read or write to a specific property of a specific type.
+
+1. Call the `Build` method to construct one, passing in a root type (`SpriteRenderer`, in this case) and a property name ("color".)
+2. Pass in the type of the named property ("color") as a generic type parameter (`Color`.)
+3. Use the `GetValue` or `SetValue` method on an object of the root type.
+
+```cs
+public SpriteRenderer root;
+
+private Getter<Color> _getter;
+private Setter<Color> _setter;
+
+void Awake()
+{
+	_getter = Getter.Build<Color>(typeof(SpriteRenderer), "color");
+	_setter = Setter.Build<Color>(typeof(SpriteRenderer), "color");
+}
+
+void Start()
+{
+	var retrievedColor = _getter.GetValue(root);
+	_setter.SetValue(root, Color.yellow);
+}
+```
+
+#### How does this work?
+`Getter` and `Setter` are simply wrappers around code that compiled a LINQ `Expression` via the C# [expression tree API.](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/expression-trees/expression-trees-building)
+
+More benchmarks can be found [here.](Documentation/Benchmarks.md)
+
 ***
+
+## Extra Applications
+
+This repository includes a couple common applications for which `Getter`s and `Setter`s are useful. 
 
 ### PropertyReference
 Dynamically reference a field, property, or parameter-less method on any Object.
@@ -28,6 +68,10 @@ private void Start()
 
 ![PropertyReference Demo](https://user-images.githubusercontent.com/38191432/166614302-946f456a-b880-408d-8c10-3b3b4c195ac6.gif)
 
+This is similar to building a `Getter`, but:
+- It references a specific property on a specific object, not any object of the root type.
+- It has a really nice custom property drawer.
+
 ***
 
 ### ShowIf
@@ -42,30 +86,6 @@ public bool useCustomTitle;
 [DisableIf("useCustomTitle")] public string defaultTitle;
 [EnableIf("useCustomTitle")] public string overrideTitle;
 ```
-
-***
-
-### Getter
-All previous APIs use this behind the scenes. You can build a Getter for your own purposes.
-
-```cs
-public private SpriteRenderer powerUpSprite;
-public SpriteRenderer debuffSprite;
-
-private Getter<Color> _getter;
-
-private void Start()
-{
-    _getter = Getter.Build<Color>(typeof(SpriteRenderer), "color");
-    var powerUpColor = _getter.GetValue(powerUpSprite);
-    var debuffColor = _getter.GetValue(debuffSprite);
-}
-```
-
-#### How is this reflection so fast?
-Only the `Initialize` method uses traditional reflection. Then, it compiles a LINQ `Expression` into a Getter `Func`. As shown in the benchmarks above, `Func` is suitably fast for use at runtime.
-
-Complete benchmarks can be found [here.](Documentation/Benchmarks.md)
 
 ***
 
